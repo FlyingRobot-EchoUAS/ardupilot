@@ -1,0 +1,42 @@
+Information about what we tried on Ardupilot:
+
+We are using a WSL2 Ubuntu distribution. I cloned the Ardupilot repository under EchoUAS, the one forked from Ardupilot github. 
+
+From here we opened a WSL supporting VS Code instance and made the EchoUASL431-Airspeed hwdef files. Having copy pasted from the MatekL431-Airpseed and changing ARSPD_TYPE from 9 to 6.
+
+Used WSL:
+./waf clean
+./waf configure --board EchoUASL431-Airspeed
+./Tools/scripts/build_bootloaders.py EchoUASL431-Airspeed
+./waf AP_Periph
+
+(Also tried to build MatekL431 firmware for RC, Periph, and also made and changed some of the EchoUASL431-Periph -- Should be in the github)
+
+Using WSL direct flashing:
+
+st-flash write Tools/bootloaders/EchoUASL431-Airspeed_bl.bin 0x08000000
+st-flash write build/bin/build/EchoUASL431Airspeed/bin/AP_Periph_with_bl.bin 0x0800A000
+
+I also tried to upload the operational firmware to a few other logical addresses to see if that may have been the issue. Namely, uploading to the page directly after the bootloader. This still resulted in the same problems. 
+
+I have also tried flashing the file with the bootloader using this method and using STM Cube Programmer (which unsurprisingly results in the same issues)
+
+The problems:
+
+It is at a point where with only the bootloader loaded onto the board, droneCAN GUI can see the CAN node and says it needs maintenance. However, we encounter issues when trying to then "update the firmware". Which then also corrupts the chip and which then needs to be erased and then re-flashed with the bootloader 
+
+If the AP Periph binary file is there it does not show up in the droneCAN GUI. All nodes, irrespective of firmware are invisible.
+
+It never shows up, or displays airspeed information on Mission Planner.
+
+Additional: 
+
+Query: The matekl431 preloaded firmware is vastly different to anything that Arupilot can build or at least using the build process we have been using. However, there is no other build process
+
+We tried downloading the MatekL431 preloaded firmware from the matek CAN node, PWM-CAN node. However, even when flashing their firmware onto the EchoUAS board, the same problems arise (bl only means maintenance mode and anything further results in invisibility)
+
+
+Another finding from the Ardupilot discord, AP_Periph page was that another user is having similar issues. Where they can only see some of the CAN nodes on either mission planner or droneCAN GUI.
+
+
+Perhaps the issue is on Arudpilot's side??
